@@ -1,0 +1,7 @@
+name = GitHub API
+description = Access the github API from Drupal.
+
+core = 7.x
+
+dependencies = composer_manager
+

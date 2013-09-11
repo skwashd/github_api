@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * @file
+ * GitHub API module functions.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function github_api_menu() {
+  $items = array();
+
+  $items['admin/config/development/github_api'] = array(
+    'title' => 'GitHub API',
+    'description' => 'Configure the GitHub API.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('github_api_settings'),
+    'access arguments' => array('administer github api'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function github_api_permission() {
+  return array(
+    'administer github api' => array(
+      'title' => t('Administer GitHub API'),
+      'description' => t('Configure the GitHub API module settings.'),
+    ),
+  );
+}
+
+/**
+ * Instantiates a GitHub client object.
+ *
+ * @param bool $auth
+ *  If TRUE the client will use authenticated calls.
+ *
+ * @return GithubClient
+ *  The instantiated object.
+ */
+function github_api_client($auth = TRUE) {
+  composer_manager_register_autoloader();
+
+  $client = new Github\Client();
+
+  if ($auth) {
+    $client->authenticate(variable_get('github_api_username'), variable_get('github_api_password'), Github\Client::AUTH_HTTP_PASSWORD);
+  }
+
+  return $client;
+}
+
+/**
+ * Admin settings form
+ */
+function github_api_settings() {
+  $form = array();
+
+  $form['github_api_username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('GitHub username'),
+    '#required' => TRUE,
+    '#default_value' => variable_get('github_api_username'),
+  );
+
+  $password = variable_get('github_api_password');
+  $form['github_api_password'] = array(
+    '#type' => 'password',
+    '#title' => t('Password'),
+    '#required' => empty($password),
+  );
+
+  $form['github_api_current_password'] = array(
+    '#type' => 'value',
+    '#value' => $password,
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validates submission of the GitHub API settings form.
+ */
+function github_api_settings_validate($form, &$form_state) {
+  $password = $form_state['values']['github_api_password'];
+  if (!$password) {
+    $form_state['values']['github_api_password'] = $form_state['values']['github_api_current_password'];
+  }
+
+  unset($form_state['values']['github_api_current_password']);
+}
+
