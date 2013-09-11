@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * GitHub API module installation functions.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function github_api_uninstall() {
+  $variables = array(
+    'github_api_username',
+    'github_api_password',
+  );
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}
