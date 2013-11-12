@@ -38,10 +38,10 @@ function github_api_permission() {
  * Instantiates a GitHub client object.
  *
  * @param bool $auth
- *  If TRUE the client will use authenticated calls.
+ *   If TRUE the client will use authenticated calls.
  *
  * @return GithubClient
- *  The instantiated object.
+ *   The instantiated object.
  */
 function github_api_client($auth = TRUE) {
   composer_manager_register_autoloader();
@@ -56,7 +56,171 @@ function github_api_client($auth = TRUE) {
 }
 
 /**
- * Admin settings form
+ * Fetches a diff between 2 commits or branches.
+ *
+ * @param string $username
+ *   The github username of the repo owner.
+ * @param string $repository
+ *   The name of the repository.
+ * @param string $base
+ *   The name or hash to use as the base for the comparison.
+ * @param string $head
+ *   The name of the head.
+ *
+ * @return array
+ *
+ * @throws Exception
+ */
+function github_api_diff($username, $repository, $base, $head) {
+  $client = github_api_client();
+  $response = $client->api('repo')->commits()->compare($username, $repository, $base, $head, 'application/vnd.github.v3.diff');
+  return $response;
+}
+
+
+/**
+ * Function to create a branch from a given head.
+ *
+ * @param string $username
+ *   The github username of the repo owner.
+ * @param string $repository
+ *   The name of the repository.
+ * @param string $source
+ *   The name of the head that the branch will be created from.
+ * @param string $destination
+ *   The name of the new branch head.
+ *
+ * @return array
+ *
+ * @throws Exception
+ */
+function github_api_create_branch($username = NULL, $repository = NULL, $source = NULL, $destination = NULL) {
+  $client = github_api_client();
+
+  try {
+    $client->api('current_user')->show();
+
+    $references = $client->api('git')->references();
+
+    $branch_head = $references->show($username, $repository, 'heads/' . $source);
+
+    if (!($references instanceof Github\Api\GitData\References)) {
+      throw new Exception('Create action failed.');
+    }
+
+    $params = array(
+      'ref' => 'refs/heads/' . $destination,
+      'sha' => $branch_head['object']['sha'],
+    );
+
+    return $references->create($username, $repository, $params);
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Function to merge a head into a branch from a given repository.
+ *
+ * @param string $username
+ *   The github username of the repo owner.
+ * @param string $repository
+ *   The name of the repository.
+ * @param string $source
+ *   The head to merge. This can be a branch name or a commit SHA1.
+ * @param string $destination
+ *   The name of the base branch that the head will be merged into.
+ * @param string $message
+ *   Commit message to use for the merge commit. If omitted, a default message
+ * will be used.
+ *
+ * @return array
+ *
+ * @throws Exception
+ */
+function github_api_merge($username = NULL, $repository = NULL, $source = NULL, $destination = NULL, $message = NULL) {
+  $client = github_api_client();
+
+  try {
+    $client->api('current_user')->show();
+
+    $repo_object = $client->api('repo');
+    $references = $client->api('git')->references();
+
+    $branch_head = $references->show($username, $repository, 'heads/' . $source);
+
+    if (!($references instanceof Github\Api\GitData\References) || !($repo_object instanceof Github\Api\Repo)) {
+      throw new Exception('Merge action failed.');
+    }
+
+    return $repo_object->merge($username, $repository, $destination, $source, $message);
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Function to merge a head into a branch from a given repository.
+ *
+ * @param string $username
+ *   The github username of the repo owner.
+ * @param string $repository
+ *   The name of the repository.
+ * @param string $source
+ *   The base head to merge or create a new branch. This can be a branch name or
+ * a commit SHA1.
+ * @param string $destination
+ *   The name of the new branch or the branch that will be merged into.
+ * @param string $message
+ *   Commit message to use for the merge commit. If omitted, a default message
+ * will be used.
+ *
+ * @return array
+ *
+ * @throws Exception
+ */
+function github_api_create_or_merge_branch($username = NULL, $repository = NULL, $source = NULL, $destination = NULL, $message = NULL) {
+  $client = github_api_client();
+
+  try {
+    $client->api('current_user')->show();
+
+    $references = $client->api('git')->references();
+
+    if (!($references instanceof Github\Api\GitData\References)) {
+      throw new Exception('Create or merge action failed.');
+    }
+
+    // Throws not found exception
+    $branch_source = $references->show($username, $repository, 'heads/' . $source);
+    try {
+      $branch_dest = $references->show($username, $repository, 'heads/' . $destination);
+    }
+    catch (Exception $exception) {
+      $params = array(
+        'ref' => 'refs/heads/' . $destination,
+        'sha' => $branch_source['object']['sha'],
+      );
+
+      return $references->create($username, $repository, $params);
+    }
+    // Finally
+    $repo_object = $client->api('repo');
+    if (!($repo_object instanceof Github\Api\Repo)) {
+      throw new Exception('Merge action failed.');
+    }
+
+    return $repo_object->merge($username, $repository, $destination, $source, $message);
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Admin settings form.
  */
 function github_api_settings() {
   $form = array();
@@ -94,4 +258,3 @@ function github_api_settings_validate($form, &$form_state) {
 
   unset($form_state['values']['github_api_current_password']);
 }
-
