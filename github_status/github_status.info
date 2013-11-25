@@ -1,0 +1,5 @@
+name = GitHub status
+description = Provides access to the github status API
+core = 7.x
+
+depedencies[] = date_api

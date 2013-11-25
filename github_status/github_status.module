@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * GitHub status API module functions.
+ */
+
+/**
+ * Retreieves the last status message from the GitHub API.
+ *
+ * @return stdClass
+ *  The status message.
+ *
+ * @throws Exception
+ */
+function github_status_last_message() {
+  $data = github_status_fetch('last-message.json');
+  $data->created_on = DateObject::createFromFormat(DateTime::ATOM, $data->created_on)->getTimestamp();
+  return $data;
+}
+
+/**
+ * Retreieves status messages from the GitHub API.
+ *
+ * @return array
+ *  List of messages from the API.
+ *
+ * @throws Exception
+ */
+function github_status_messages() {
+  $data = github_status_fetch('messages.json');
+  foreach ($data as &$msg) {
+    $msg->created_on = DateObject::createFromFormat(DateTime::ATOM, $msg->created_on)->getTimestamp();
+  }
+  return $data;
+}
+
+/**
+ * Retreieves the current status of the GitHub API.
+ *
+ * @return stdClass
+ *  The current API status.
+ *
+ * @throws Exception
+ */
+function github_status_status() {
+  $data = github_status_fetch('status.json');
+  $data->last_updated = DateObject::createFromFormat(DateTime::ATOM, $data->last_updated)->getTimestamp();
+  return $data;
+}
+
+/**
+ * Fetches GitHub status data.
+ *
+ * @param string $path
+ *  The API path to use for the request.
+ *
+ * @return mixed
+ *  The unserialised data returned from the request.
+ *
+ * @throws Exception
+ */
+function github_status_fetch($path = '') {
+  $base_url = 'https://status.github.com/api';
+  $url = "{$base_url}/{$path}";
+
+  $options = array(
+    'method' => 'GET',
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Content-Type' => 'application/json',
+    ),
+  );
+
+  $response = drupal_http_request($url, $options);
+  if (!isset($response->error)) {
+    return json_decode($response->data);
+  }
+
+  throw new Exception($response->error, $response->code);
+}
