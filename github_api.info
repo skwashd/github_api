@@ -3,5 +3,5 @@ description = Access the github API from Drupal.
 
 core = 7.x
 
-dependencies = composer_manager
+dependencies[] = composer_manager
 
