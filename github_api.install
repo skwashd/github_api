@@ -6,14 +6,33 @@
  */
 
 /**
+ * Implements hook_schema().
+ */
+function github_api_schema() {
+  $schema = array();
+  $schema['cache_github_api'] = drupal_get_schema_unprocessed('system', 'cache');
+  return $schema;
+}
+
+/**
  * Implements hook_uninstall().
  */
 function github_api_uninstall() {
   $variables = array(
     'github_api_username',
     'github_api_password',
+    'github_api_use_cache',
   );
   foreach ($variables as $variable) {
     variable_del($variable);
   }
+}
+
+/**
+ * Add cache table.
+ */
+function github_api_update_7001(&$sadnbox) {
+  $name = 'cache_github_api';
+  $schema = drupal_get_schema_unprocessed('system', 'cache');
+  db_create_table($name, $schema);
 }

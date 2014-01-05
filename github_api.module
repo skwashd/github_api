@@ -35,6 +35,13 @@ function github_api_permission() {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function github_api_flush_caches() {
+  return array('cache_github_api');
+}
+
+/**
  * Instantiates a GitHub client object.
  *
  * @param bool $auth
@@ -46,7 +53,13 @@ function github_api_permission() {
 function github_api_client($auth = TRUE) {
   composer_manager_register_autoloader();
 
-  $client = new Github\Client();
+  $cache_obj = NULL;
+  if (variable_get('github_api_use_cache', TRUE)) {
+    $cache_obj = new \Github\HttpClient\CachedHttpClient();
+    $cache_obj->setCache(new DrupalGithubApiHttpClientCacheDrupalNativeCache());
+  }
+
+  $client = new Github\Client($cache_obj);
 
   if ($auth) {
     $client->authenticate(variable_get('github_api_username'), variable_get('github_api_password'), Github\Client::AUTH_HTTP_PASSWORD);
@@ -242,6 +255,17 @@ function github_api_settings() {
   $form['github_api_current_password'] = array(
     '#type' => 'value',
     '#value' => $password,
+  );
+
+  $form['github_api_use_cache'] = array(
+    '#type' => 'select',
+    '#title' => t('Use caching'),
+    '#options' => array(
+      0 => t('No'),
+      1 => t('Yes'),
+    ),
+    '#default_value' => variable_get('github_api_use_cache', TRUE),
+    '#description' => t('Cache responses from the github API to reduce number of calls made.'),
   );
 
   return system_settings_form($form);
