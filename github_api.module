@@ -63,17 +63,58 @@ function github_api_client($auth = TRUE) {
   $client = new Github\Client($cache_obj);
 
   if ($auth) {
-    $client->authenticate(variable_get('github_api_username'), variable_get('github_api_password'), Github\Client::AUTH_HTTP_PASSWORD);
+    $token = variable_get('github_api_token');
+    $user = variable_get('github_api_username');
+    if ($token) {
+      $client->authenticate($user, $token, GitHub\Client::AUTH_HTTP_PASSWORD);
+    }
+    else {
+      $client->authenticate($user, variable_get('github_api_password'), GitHub\Client::AUTH_HTTP_TOKEN);
+    }
   }
 
   return $client;
 }
 
 /**
+ * Request a GitHub API oAuth token.
+ *
+ * @param string $username
+ *   The GitHub username to use for the request.
+ * @param string $password
+ *   The password for the GitHub user.
+ * @param string $note
+ *   A note to annotate the token in GitHub.
+ *
+ * @return string
+ *   The oAuth token.
+ */
+function github_api_get_token($username, $password, $note = '') {
+  composer_manager_register_autoloader();
+
+  $client = new Github\Client();
+  $client->authenticate($username, $password, GitHub\Client::AUTH_HTTP_PASSWORD);
+  if (!$note) {
+    $note = variable_get('site_name');
+  }
+
+  $params = array(
+    'note' => $note,
+    'note_url' => $GLOBALS['base_url'],
+    'scopes' => array('user', 'repo'),
+  );
+
+  $response = $client->api('authorizations')->create($params);
+  if (!empty($response['token'])) {
+    return $response['token'];
+  }
+}
+
+/**
  * Fetches a diff between 2 commits or branches.
  *
  * @param string $username
- *   The github username of the repo owner.
+ *   The GitHub username of the repo owner.
  * @param string $repository
  *   The name of the repository.
  * @param string $base

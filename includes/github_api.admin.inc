@@ -5,7 +5,7 @@
  */
 
 /**
- * Github API admin settings form.
+ * Admin settings form.
  */
 function github_api_settings() {
   $form = array();
@@ -17,40 +17,35 @@ function github_api_settings() {
     '#default_value' => variable_get('github_api_username'),
   );
 
-  $password = variable_get('github_api_password');
   $form['github_api_password'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
-    '#required' => empty($password),
+    '#required' => TRUE,
+    '#description' => t('This password is not stored it only used for generating the authentication token.'),
   );
 
-  $form['github_api_current_password'] = array(
-    '#type' => 'value',
-    '#value' => $password,
+  $form['actions'] = array();
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Generate and store token'),
   );
 
-  $form['github_api_use_cache'] = array(
-    '#type' => 'select',
-    '#title' => t('Use caching'),
-    '#options' => array(
-      0 => t('No'),
-      1 => t('Yes'),
-    ),
-    '#default_value' => variable_get('github_api_use_cache', TRUE),
-    '#description' => t('Cache responses from the github API to reduce number of calls made.'),
-  );
-
-  return system_settings_form($form);
+  return $form;
 }
 
 /**
- * Validates submission of the GitHub API settings form.
+ * Handles submission of the GitHub settings form.
  */
-function github_api_settings_validate($form, &$form_state) {
+function github_api_settings_submit($form, &$form_state) {
+  $username = $form_state['values']['github_api_username'];
   $password = $form_state['values']['github_api_password'];
-  if (!$password) {
-    $form_state['values']['github_api_password'] = $form_state['values']['github_api_current_password'];
+  try {
+    $token = github_api_get_token($username, $password);
+    variable_set('github_api_token', $token);
+    variable_set('github_api_username', $username);
+    drupal_set_message(t('Generated and stored github authentication token'));
   }
-
-  unset($form_state['values']['github_api_current_password']);
+  catch (Exception $e) {
+    drupal_set_message(t('Unable to generate token. Error: @error', array('@error' => $e->getMessage())), 'error');
+  }
 }
