@@ -1,11 +1,11 @@
 {
     "require": {
-        "knplabs/github-api": "*"
+        "knplabs/github-api": "1.2.1"
     },
     "repositories": [
         {
              "type": "vcs",
-             "url": "https://github.com/skwashd/php-github-api"
+             "url": "https://github.com/KnpLabs/php-github-api"
          }
     ],
     "minimum-stability": "dev"
