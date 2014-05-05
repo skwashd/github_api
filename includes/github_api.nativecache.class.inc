@@ -92,6 +92,10 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
       self::$lookup[$id] = $cached;
     }
 
-    return self::$lookup[$key];
+    if (!empty(self::$lookup[$key])) {
+      return self::$lookup[$key];
+    }
+
+    return NULL;
   }
 }
