@@ -60,7 +60,7 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
     }
 
     return $cached['response'];
-}
+  }
 
   /**
    * {@inheritdoc}
