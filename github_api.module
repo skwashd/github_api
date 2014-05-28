@@ -57,7 +57,7 @@ function github_api_client($auth = TRUE) {
   $cache_obj = NULL;
   if (variable_get('github_api_use_cache', TRUE)) {
     $cache_obj = new \Github\HttpClient\CachedHttpClient();
-    $cache_obj->setCache(new DrupalGithubApiHttpClientCacheDrupalNativeCache());
+    $cache_obj->setCache(new \GithubApi\DrupalGithubApiHttpClientCacheDrupalNativeCache());
   }
 
   $client = new Github\Client($cache_obj);

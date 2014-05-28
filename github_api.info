@@ -5,5 +5,3 @@ core = 7.x
 
 dependencies[] = composer_manager
 
-files[] = includes/github_api.nativecache.class.inc
-

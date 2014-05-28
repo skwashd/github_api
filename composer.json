@@ -8,5 +8,10 @@
              "url": "https://github.com/KnpLabs/php-github-api"
          }
     ],
+    "autoload": {
+    "psr-0": {
+            "GithubApi\\": "src/"
+        }
+    },
     "minimum-stability": "dev"
 }
