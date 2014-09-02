@@ -289,3 +289,39 @@ function github_api_create_or_merge_branch($username = NULL, $repository = NULL,
     watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
   }
 }
+
+/**
+ * Rule action to delete a branch.
+ *
+ * @param string $username
+ *   The GitHub username of the repo owner.
+ *
+ * @param string $repository
+ *   The name of the repository.
+ *
+ * @param string $source_branch
+ *   The name of the branch to be deleted.
+ *
+ * @throws Exception
+ */
+function github_api_delete_branch($username = NULL, $repository = NULL, $source_branch = NULL) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $client->api('current_user')->show();
+    $references = $client->api('git')->references();
+
+    if (!($references instanceof Github\Api\GitData\References)) {
+      throw new Exception('Create action failed.');
+    }
+
+    return $references->remove($username, $repository, 'heads/' . $source_branch);
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
