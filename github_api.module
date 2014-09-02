@@ -127,6 +127,10 @@ function github_api_get_token($username, $password, $note = '') {
  * @throws Exception
  */
 function github_api_diff($username, $repository, $base, $head) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
   $client = github_api_client();
   $response = $client->api('repo')->commits()->compare($username, $repository, $base, $head, 'application/vnd.github.v3.diff');
   return $response;
@@ -150,6 +154,10 @@ function github_api_diff($username, $repository, $base, $head) {
  * @throws Exception
  */
 function github_api_create_branch($username = NULL, $repository = NULL, $source = NULL, $destination = NULL) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
   $client = github_api_client();
 
   try {
@@ -195,6 +203,10 @@ function github_api_create_branch($username = NULL, $repository = NULL, $source 
  * @throws Exception
  */
 function github_api_merge($username = NULL, $repository = NULL, $source = NULL, $destination = NULL, $message = NULL) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
   $client = github_api_client();
 
   try {
@@ -237,6 +249,10 @@ function github_api_merge($username = NULL, $repository = NULL, $source = NULL, 
  * @throws Exception
  */
 function github_api_create_or_merge_branch($username = NULL, $repository = NULL, $source = NULL, $destination = NULL, $message = NULL) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
   $client = github_api_client();
 
   try {
