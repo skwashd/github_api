@@ -325,3 +325,87 @@ function github_api_delete_branch($username = NULL, $repository = NULL, $source_
     watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
   }
 }
+
+/**
+ * Callback to fetch a repository's latest release.
+ *
+ * @param string $username
+ *   The GitHub username of the repo owner.
+ *
+ * @param string $repository
+ *   The name of the repository.
+ *
+ * @throws Exception
+ */
+function github_api_get_latest_release($username = NULL, $repository = NULL) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $client->api('current_user')->show();
+    $release = $client->api('repo')->releases()->latest($username, $repository);
+
+    if (!(is_array($release))) {
+      throw new Exception('Fetch latest release failed.');
+    }
+
+    return $release;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Callback to fetch a binary asset by ID and save it as a managed file.
+ *
+ * @param string $username
+ *   The GitHub username of the repo owner.
+ *
+ * @param string $repository
+ *   The name of the repository.
+ *
+ * @param int $asset_id
+ *   The asset's ID.
+ *
+ * @param string $uri
+ *   The URI to which to save the file. (e.g. 'public://filename.zip')
+ *
+ * @return object $file
+ *   Drupal file object
+ *
+ * @throws Exception
+ */
+function github_api_fetch_asset($username = NULL, $repository, $asset_id, $uri) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $url = url(
+      'https://api.github.com/repos/' . $repository . '/' . $username . '/releases/assets/' . $asset_id,
+      array('query' => array('access_token' => variable_get('github_api_token', '')))
+    );
+
+    $options = array(
+      'headers' => array(
+        'Accept' => 'application/octet-stream',
+      ),
+      'timeout' => 300,
+    );
+    $asset = drupal_http_request($url, $options);
+
+    if (!empty($asset->data)) {
+      $file = file_save_data($asset->data, $uri);
+    }
+    return $file;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
