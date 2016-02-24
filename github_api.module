@@ -409,3 +409,46 @@ function github_api_fetch_asset($username = NULL, $repository, $asset_id, $uri) 
     watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
   }
 }
+
+/**
+ * Callback to fetch a file by URL from a private repo and save it as a managed file.
+ *
+ * @param string $username
+ *   The GitHub username of the repo owner.
+ *
+ * @param int $url
+ *   The asset's ID.
+ *
+ * @param string $uri
+ *   The URI to which to save the file. (e.g. 'public://filename.zip')
+ *
+ * @return object $file
+ *   Drupal file object
+ *
+ * @throws Exception
+ */
+function github_api_fetch_private_file($username = NULL, $url, $uri) {
+  if (!$username) {
+    $username = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $remote_url = url(
+      $url,
+      array('query' => array('access_token' => variable_get('github_api_token', '')))
+    );
+
+    $options = array('timeout' => 300);
+    $asset = drupal_http_request($remote_url, $options);
+
+    if (!empty($asset->data)) {
+      $file = file_save_data($asset->data, $uri);
+    }
+    return $file;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
