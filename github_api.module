@@ -392,17 +392,23 @@ function github_api_fetch_asset($username = NULL, $repository, $asset_id, $uri) 
       array('query' => array('access_token' => variable_get('github_api_token', '')))
     );
 
-    $options = array(
-      'headers' => array(
-        'Accept' => 'application/octet-stream',
-      ),
-      'timeout' => 300,
-    );
-    $asset = drupal_http_request($url, $options);
+    // Retrieve file with curl. (To avoid memory limit issues)
+    set_time_limit(300);
+    $tempfile = drupal_tempnam(file_directory_temp(), 'rdp');
+    $fp = fopen($tempfile, 'w+');
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+    curl_setopt($ch, CURLOPT_FILE, $fp);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/octet-stream'));
+    curl_setopt($ch,CURLOPT_USERAGENT,'Drupal (+http://drupal.org/)');
+    curl_exec($ch);
+    curl_close($ch);
+    fclose($fp);
 
-    if (!empty($asset->data)) {
-      $file = file_save_data($asset->data, $uri);
-    }
+    // Create the managed file.
+    $fp = fopen($tempfile, 'r');
+    $file = file_save_data($fp, $uri);
     return $file;
   }
   catch (Exception $exception) {
