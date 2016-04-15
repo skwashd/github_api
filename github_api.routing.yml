@@ -1,0 +1,9 @@
+github_api.settings_form:
+  path: '/admin/config/development/github_api'
+  defaults:
+    _form: '\Drupal\github_api\Form\SettingsForm'
+    _title: 'Github API settings'
+  requirements:
+    _permission: 'administer github api'
+  options:
+    _admin_route: TRUE

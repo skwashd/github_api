@@ -1,0 +1,4 @@
+administer github api:
+  title: 'Administer Github API'
+  description: 'Configure the GitHub API module settings.'
+  restrict access: true

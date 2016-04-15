@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for github_api module.
+ */
+
+function github_api_schema() {
+  $schema['cache_github_api'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_admin_menu']['github_api'] = 'Cache table for github_api module.';
+  return $schema;
+}

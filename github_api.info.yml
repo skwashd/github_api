@@ -1,0 +1,6 @@
+name: 'Github API'
+type: module
+description: 'Access the github API from Drupal.'
+package: Other
+version: VERSION
+core: 8.x

@@ -1,0 +1,9 @@
+{
+  "name":"drupal/github_api",
+  "description":"Access the github API from Drupal.",
+  "type": "drupal-module",
+  "license": "GPL-2.0+",
+  "require": {
+    "knplabs/github-api": "1.6.0"
+  }
+}
