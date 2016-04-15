@@ -1,0 +1,7 @@
+services:
+  cache.github_api:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: cache_factory:get
+    arguments: [github_api]

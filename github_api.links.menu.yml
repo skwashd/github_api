@@ -1,0 +1,6 @@
+github_api.settings:
+  title: Github API Settings
+  parent: system.admin_config_development
+  description: 'Github API module settings.'
+  route_name: github_api.settings_form
+  weight: 0

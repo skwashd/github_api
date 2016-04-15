@@ -7,7 +7,7 @@
 
 namespace Drupal\github_api\Form;
 
-use Drupal\Core\Config\ConfigFormBase;
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -35,14 +35,15 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function build(array $form, FormStateInterface $form_state) {
-    $form = array();
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $config = $this->config('github_api.settings');
 
+    $form = parent::buildForm($form, $form_state);
     $form['github_api_username'] = array(
       '#type' => 'textfield',
       '#title' => t('GitHub username'),
       '#required' => TRUE,
-      '#default_value' => variable_get('github_api_username'),
+      '#default_value' => $config->get('github_api_username'),
     );
 
     $form['github_api_password'] = array(
@@ -52,11 +53,7 @@ class SettingsForm extends ConfigFormBase {
       '#description' => t('This password is not stored it only used for generating the authentication token.'),
     );
 
-    $form['actions'] = array();
-    $form['actions']['submit'] = array(
-     '#type' => 'submit',
-     '#value' => t('Generate and store token'),
-    );
+    $form['actions']['submit']['#value'] = t('Generate and store token');
 
     return $form;
   }
@@ -64,11 +61,11 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $username = $form_state->getValue['github_api_username'];
-    $password = $form_state->getValue['github_api_password'];
+    $username = $form_state->getValue('github_api_username');
+    $password = $form_state->getValue('github_api_password');
     try {
       $config = $this->config('github_api.settings');
       $token = github_api_get_token($username, $password);
@@ -77,7 +74,7 @@ class SettingsForm extends ConfigFormBase {
       $config->set('github_api_password', $password);
       drupal_set_message(t('Generated and stored github authentication token'));
     }
-    catch (Exception $e) {
+    catch (\Exception $e) {
       drupal_set_message(t('Unable to generate token. Error: @error', array('@error' => $e->getMessage())), 'error');
     }
   }
