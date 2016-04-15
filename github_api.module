@@ -8,6 +8,8 @@
 use Github\Client;
 use Github\Api\GitData\References;
 use Github\Api\Repo;
+use Github\HttpClient\CachedHttpClient;
+use Drupal\github_api\DrupalGithubApiHttpClientCacheDrupalNativeCache;
 
 /**
  * Instantiates a GitHub client object.
@@ -28,7 +30,7 @@ function github_api_client($auth = TRUE) {
   }
 
   if ($use_cache) {
-    $cache_obj = new \Github\HttpClient\CachedHttpClient();
+    $cache_obj = new CachedHttpClient();
     $cache_obj->setCache(new DrupalGithubApiHttpClientCacheDrupalNativeCache());
   }
 
@@ -62,12 +64,12 @@ function github_api_client($auth = TRUE) {
  *   The oAuth token.
  */
 function github_api_get_token($username, $password, $note = '') {
-  $config = \Drupal::service('config.factory')->get('github_api.settings');
+  $config = \Drupal::service('config.factory')->get('system.site');
 
   $client = new Client();
   $client->authenticate($username, $password, Client::AUTH_HTTP_PASSWORD);
   if (!$note) {
-    $note = $config->get('site_name');
+    $note = $config->get('name');
   }
 
   $params = array(
@@ -131,7 +133,7 @@ function github_api_create_branch($username = NULL, $repository = NULL, $source 
 
     $branch_head = $references->show($username, $repository, 'heads/' . $source);
 
-    if (!($references instanceof Github\Api\GitData\References)) {
+    if (!($references instanceof References)) {
       throw new \Exception('Create action failed.');
     }
 

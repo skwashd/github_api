@@ -72,6 +72,7 @@ class SettingsForm extends ConfigFormBase {
       $config->set('github_api_token', $token);
       $config->set('github_api_username', $username);
       $config->set('github_api_password', $password);
+      $config->save();
       drupal_set_message(t('Generated and stored github authentication token'));
     }
     catch (\Exception $e) {

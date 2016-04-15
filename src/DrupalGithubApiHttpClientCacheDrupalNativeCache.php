@@ -5,6 +5,8 @@
  * Drupal Cache implementation of the Github API library cache.
  */
 
+namespace Drupal\github_api;
+
 use Github\HttpClient\Cache\CacheInterface;
 use Guzzle\Http\Message\Response;
 
@@ -75,7 +77,7 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
     );
 
     // cache_set can fail silently, so we have no way of knowing if this fails.
-    cache_set($key, $data, 'cache_github_api');
+    \Drupal::cache('github_api')->set($key, $data);
   }
 
   /**
@@ -89,7 +91,7 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
   protected function loadRaw($id) {
     $key = "response_{$id}";
     if (empty(self::$lookup[$key])) {
-      $cached = cache_get($key, 'cache_github_api');
+      $cached = \Drupal::cache('github_api')->get($key);
       self::$lookup[$id] = $cached;
     }
 
