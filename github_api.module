@@ -145,7 +145,7 @@ function github_api_create_branch($username = NULL, $repository = NULL, $source 
     return $references->create($username, $repository, $params);
   }
   catch (\Exception $exception) {
-    \Drupal::logger('github_api')->error('@exception', array('@exception' => $exception->getMessage()));
+    github_api_log_exception($exception);
   }
 }
 
@@ -187,7 +187,7 @@ function github_api_merge($username = NULL, $repository = NULL, $source = NULL, 
     return $repo_object->merge($username, $repository, $destination, $source, $message);
   }
   catch (\Exception $exception) {
-    \Drupal::logger('github_api')->error('@exception', array('@exception' => $exception->getMessage()));
+    github_api_log_exception($exception);
   }
 }
 
@@ -245,6 +245,72 @@ function github_api_create_or_merge_branch($username = NULL, $repository = NULL,
     return $repo_object->merge($username, $repository, $destination, $source, $message);
   }
   catch (\Exception $exception) {
-    \Drupal::logger('github_api')->error('@exception', array('@exception' => $exception->getMessage()));
+    github_api_log_exception($exception);
   }
+}
+
+/**
+ * Function to fetch a file from a git repository.
+ *
+ * @param string $username
+ *   Username of the repo.
+ * @param string $repository
+ *   Respository name.
+ * @param string $path
+ *   Path of the file.
+ * @param string $reference
+ *   Reference location.
+ *
+ * @return array
+ */
+function github_api_get_file($username, $repository, $path, $reference) {
+  $client = github_api_client();
+
+  try {
+    return $client->api('repo')->contents()->show($username, $repository, $path, $reference);
+  }
+  catch (\Exception $exception) {
+    github_api_log_exception($exception);
+  }
+}
+
+/**
+ * Function to commit a file change to the repository.
+ *
+ * @param string $username
+ *   Username of the repo.
+ * @param string $repository
+ *   Repository name.
+ * @param string $path
+ *   Path to the file.
+ * @param string $content
+ *   Contents of the file.
+ * @param string $message
+ *   The commit message.
+ * @param string $sha
+ *   Hash of the original file.
+ * @param $branch
+ *   Branch to make the commit to.
+ * @param $committer
+ *   Github user to commit the change as.
+ *
+ * @return array
+ */
+function github_api_push_commit($username, $repository, $path, $content, $message, $sha, $branch, $committer) {
+  $client = github_api_client();
+
+  try{
+    return $client->api('repo')->contents()->update($username, $repository, $path, $content, $message, $sha, $branch, $committer);
+  }
+  catch (\Exception $exception) {
+    github_api_log_exception($exception);
+  }
+}
+
+
+/**
+ * Logs exeption to watchdog.
+ */
+function github_api_log_exception($exception) {
+  \Drupal::logger('github_api')->error('@exeption', array('@exception' => $exception));
 }
