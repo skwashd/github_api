@@ -1,0 +1,13 @@
+github_api.settings:
+  type: config_object
+  label: 'Github API settings'
+  mapping:
+    username:
+      type: string
+      label: 'Github username'
+    password:
+      type: string
+      label: 'Github password'
+    token:
+      type: string
+      label: 'Github token'
