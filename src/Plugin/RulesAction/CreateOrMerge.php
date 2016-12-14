@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\github_api\Plugin\RulesAction\CreateOrMerge.php
- */
 
 namespace Drupal\github_api\Plugin\RulesAction;
 
@@ -40,6 +36,7 @@ use Drupal\rules\Core\RulesActionBase;
  * )
  */
 class CreateOrMerge extends RulesActionBase {
+
   /**
    * Create the branch or merge it.
    *
@@ -55,4 +52,5 @@ class CreateOrMerge extends RulesActionBase {
   protected function doExecute($username, $repository, $source, $destination, $message) {
     github_api_create_or_merge_branch($username, $repository, $source, $destination, $message);
   }
+
 }

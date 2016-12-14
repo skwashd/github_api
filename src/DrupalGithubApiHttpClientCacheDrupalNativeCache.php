@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Drupal Cache implementation of the Github API library cache.
- */
-
 namespace Drupal\github_api;
 
 use Github\HttpClient\Cache\CacheInterface;
@@ -16,8 +11,9 @@ use Guzzle\Http\Message\Response;
 class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface {
 
   /**
-   * @var int
    * Caches data loaded during cache lookups.
+   *
+   * @var int
    */
   static protected $lookup = array();
 
@@ -44,6 +40,7 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
   /**
    * {@inheritdoc}
    */
+  // @codingStandardsIgnoreLine
   public function getETag($id) {
     $cached = $this->loadRaw($id);
     if ($cached) {
@@ -83,7 +80,8 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
   /**
    * Retreieves raw cached objects from the backend.
    *
-   * @param string $id The id of the cached resource
+   * @param string $id
+   *   The id of the cached resource.
    *
    * @return bool|Guzzle\Http\Message\Response
    *   Returns FALSE if not found, otherwise the Guzzle response object.
@@ -101,4 +99,5 @@ class DrupalGithubApiHttpClientCacheDrupalNativeCache implements CacheInterface 
 
     return NULL;
   }
+
 }

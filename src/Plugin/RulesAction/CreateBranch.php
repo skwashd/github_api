@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\github_api\Plugin\RulesAction\CreateBranch.php
- */
 
 namespace Drupal\github_api\Plugin\RulesAction;
 
@@ -36,6 +32,7 @@ use Drupal\rules\Core\RulesActionBase;
  * )
  */
 class CreateBranch extends RulesActionBase {
+
   /**
    * Create the branch.
    *
@@ -51,4 +48,5 @@ class CreateBranch extends RulesActionBase {
   protected function doExecute($username, $repository, $source, $destination) {
     github_api_create_branch($username, $repository, $source, $destination);
   }
+
 }

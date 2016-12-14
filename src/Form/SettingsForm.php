@@ -1,17 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\github_api\Form\SettingsForm
- */
-
 namespace Drupal\github_api\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class SettingsForm
+ * Class SettingsForm.
+ *
  * @package Drupal\github_api\Form
  */
 class SettingsForm extends ConfigFormBase {
@@ -21,7 +17,7 @@ class SettingsForm extends ConfigFormBase {
    */
   public function getEditableConfigNames() {
     return [
-      'github_api.settings'
+      'github_api.settings',
     ];
   }
 
@@ -41,19 +37,19 @@ class SettingsForm extends ConfigFormBase {
     $form = parent::buildForm($form, $form_state);
     $form['github_api_username'] = array(
       '#type' => 'textfield',
-      '#title' => t('GitHub username'),
+      '#title' => $this->t('GitHub username'),
       '#required' => TRUE,
       '#default_value' => $config->get('github_api_username'),
     );
 
     $form['github_api_password'] = array(
       '#type' => 'password',
-      '#title' => t('Password'),
+      '#title' => $this->t('Password'),
       '#required' => TRUE,
-      '#description' => t('This password is not stored it only used for generating the authentication token.'),
+      '#description' => $this->t('This password is not stored it only used for generating the authentication token.'),
     );
 
-    $form['actions']['submit']['#value'] = t('Generate and store token');
+    $form['actions']['submit']['#value'] = $this->t('Generate and store token');
 
     return $form;
   }
@@ -73,10 +69,11 @@ class SettingsForm extends ConfigFormBase {
       $config->set('github_api_username', $username);
       $config->set('github_api_password', $password);
       $config->save();
-      drupal_set_message(t('Generated and stored github authentication token'));
+      drupal_set_message($this->t('Generated and stored github authentication token'));
     }
     catch (\Exception $e) {
-      drupal_set_message(t('Unable to generate token. Error: @error', array('@error' => $e->getMessage())), 'error');
+      drupal_set_message($this->t('Unable to generate token. Error: @error', array('@error' => $e->getMessage())), 'error');
     }
   }
+
 }

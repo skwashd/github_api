@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\github_api\Plugin\RulesAction\Merge.php
- */
 
 namespace Drupal\github_api\Plugin\RulesAction;
 
@@ -40,6 +36,7 @@ use Drupal\rules\Core\RulesActionBase;
  * )
  */
 class Merge extends RulesActionBase {
+
   /**
    * Make the merge.
    *
@@ -55,4 +52,5 @@ class Merge extends RulesActionBase {
   protected function doExecute($username, $repository, $source, $destination, $message) {
     github_api_merge($username, $repository, $source, $destination, $message);
   }
+
 }
