@@ -5,9 +5,6 @@ github_api.settings:
     username:
       type: string
       label: 'Github username'
-    password:
-      type: string
-      label: 'Github password'
     token:
       type: string
       label: 'Github token'

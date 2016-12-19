@@ -10,6 +10,7 @@ use Github\Api\GitData\References;
 use Github\Api\Repo;
 use Github\HttpClient\CachedHttpClient;
 use Drupal\github_api\DrupalGithubApiHttpClientCacheDrupalNativeCache;
+use Drupal\Core\Url;
 
 /**
  * Instantiates a GitHub client object.
@@ -21,7 +22,7 @@ use Drupal\github_api\DrupalGithubApiHttpClientCacheDrupalNativeCache;
  *   The instantiated object.
  */
 function github_api_client($auth = TRUE) {
- $config = \Drupal::service('config.factory')->get('github_api.settings');
+  $config = \Drupal::service('config.factory')->get('github_api.settings');
 
   $cache_obj = NULL;
   $use_cache = $config->get('github_api_use_cache');
@@ -43,7 +44,11 @@ function github_api_client($auth = TRUE) {
       $client->authenticate($user, $token, Client::AUTH_HTTP_PASSWORD);
     }
     else {
-      $client->authenticate($user, $config->get('github_api_password'), Client::AUTH_HTTP_TOKEN);
+      $url = Url::fromRoute('github_api.settings_form')->toString();
+      $args = [':url' => $url];
+      $message = t('Github API token was not found.  Please updated <a href=":url">credentials</a>.', $args);
+      drupal_set_message($message, 'error');
+      \Drupal::logger('github_api')->error($message);
     }
   }
 
@@ -97,6 +102,7 @@ function github_api_get_token($username, $password, $note = '') {
  *   The name of the head.
  *
  * @return array
+ *   Github api response.
  *
  * @throws Exception
  */
@@ -105,7 +111,6 @@ function github_api_diff($username, $repository, $base, $head) {
   $response = $client->api('repo')->commits()->compare($username, $repository, $base, $head, 'application/vnd.github.v3.diff');
   return $response;
 }
-
 
 /**
  * Function to create a branch from a given head.
@@ -120,6 +125,7 @@ function github_api_diff($username, $repository, $base, $head) {
  *   The name of the new branch head.
  *
  * @return array
+ *   Github api response.
  *
  * @throws Exception
  */
@@ -162,9 +168,10 @@ function github_api_create_branch($username = NULL, $repository = NULL, $source 
  *   The name of the base branch that the head will be merged into.
  * @param string $message
  *   Commit message to use for the merge commit. If omitted, a default message
- * will be used.
+ *   will be used.
  *
  * @return array
+ *   Github api response.
  *
  * @throws Exception
  */
@@ -200,14 +207,15 @@ function github_api_merge($username = NULL, $repository = NULL, $source = NULL, 
  *   The name of the repository.
  * @param string $source
  *   The base head to merge or create a new branch. This can be a branch name or
- * a commit SHA1.
+ *   a commit SHA1.
  * @param string $destination
  *   The name of the new branch or the branch that will be merged into.
  * @param string $message
  *   Commit message to use for the merge commit. If omitted, a default message
- * will be used.
+ *   will be used.
  *
  * @return array
+ *   Github api response.
  *
  * @throws Exception
  */
@@ -223,7 +231,7 @@ function github_api_create_or_merge_branch($username = NULL, $repository = NULL,
       throw new Exception('Create or merge action failed.');
     }
 
-    // Throws not found exception
+    // Throws not found exception.
     $branch_source = $references->show($username, $repository, 'heads/' . $source);
     try {
       $branch_dest = $references->show($username, $repository, 'heads/' . $destination);
@@ -236,7 +244,7 @@ function github_api_create_or_merge_branch($username = NULL, $repository = NULL,
 
       return $references->create($username, $repository, $params);
     }
-    // Finally
+    // Finally.
     $repo_object = $client->api('repo');
     if (!($repo_object instanceof Repo)) {
       throw new Exception('Merge action failed.');
@@ -262,6 +270,7 @@ function github_api_create_or_merge_branch($username = NULL, $repository = NULL,
  *   Reference location.
  *
  * @return array
+ *   Github api response.
  */
 function github_api_get_file($username, $repository, $path, $reference) {
   $client = github_api_client();
@@ -289,24 +298,24 @@ function github_api_get_file($username, $repository, $path, $reference) {
  *   The commit message.
  * @param string $sha
  *   Hash of the original file.
- * @param $branch
+ * @param string $branch
  *   Branch to make the commit to.
- * @param $committer
+ * @param string $committer
  *   Github user to commit the change as.
  *
  * @return array
+ *   Github api resonse.
  */
 function github_api_push_commit($username, $repository, $path, $content, $message, $sha, $branch, $committer) {
   $client = github_api_client();
 
-  try{
+  try {
     return $client->api('repo')->contents()->update($username, $repository, $path, $content, $message, $sha, $branch, $committer);
   }
   catch (\Exception $exception) {
     github_api_log_exception($exception);
   }
 }
-
 
 /**
  * Logs exeption to watchdog.

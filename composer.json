@@ -4,6 +4,6 @@
   "type": "drupal-module",
   "license": "GPL-2.0+",
   "require": {
-    "knplabs/github-api": "1.6.0"
+    "knplabs/github-api": "~1.7"
   }
 }
