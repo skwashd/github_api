@@ -1,5 +1,5 @@
 {
     "require": {
-        "knplabs/github-api": "~1.4.12"
+        "knplabs/github-api": "~1.7.1"
     }
 }
