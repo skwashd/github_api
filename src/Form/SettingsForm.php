@@ -58,8 +58,6 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    parent::submitForm($form, $form_state);
-
     $username = $form_state->getValue('github_api_username');
     $password = $form_state->getValue('github_api_password');
     try {
@@ -67,9 +65,10 @@ class SettingsForm extends ConfigFormBase {
       $token = github_api_get_token($username, $password);
       $config->set('github_api_token', $token);
       $config->set('github_api_username', $username);
-      $config->set('github_api_password', $password);
       $config->save();
       drupal_set_message($this->t('Generated and stored github authentication token'));
+
+      parent::submitForm($form, $form_state);
     }
     catch (\Exception $e) {
       drupal_set_message($this->t('Unable to generate token. Error: @error', array('@error' => $e->getMessage())), 'error');
