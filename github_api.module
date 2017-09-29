@@ -325,3 +325,60 @@ function github_api_delete_branch($username = NULL, $repository = NULL, $source_
     watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
   }
 }
+
+/**
+ * Retrieves repository information.
+ */
+function github_api_get_repository_info($repository_owner = NULL, $repository_name = NULL) {
+  if (!$repository_owner) {
+    $repository_owner = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $repository_info = $client->api('repo')->show($repository_owner, $repository_name);
+    return $repository_info;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Retrieves repository branches.
+ */
+function github_api_get_branches_info($repository_owner = NULL, $repository_name = NULL) {
+  if (!$repository_owner) {
+    $repository_owner = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $branches_info = $client->api('repo')->branches($repository_owner, $repository_name);
+    return $branches_info;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Retrieves repository tags.
+ */
+function github_api_get_tags_info($repository_owner = NULL, $repository_name = NULL) {
+  if (!$repository_owner) {
+    $repository_owner = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $tags_info = $client->api('repo')->tags($repository_owner, $repository_name);
+    return $tags_info;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
