@@ -344,3 +344,22 @@ function github_api_get_repository_info($repository_owner = NULL, $repository_na
     watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
   }
 }
+
+/**
+ * Retrieves repository branches.
+ */
+function github_api_get_branches_info($repository_owner = NULL, $repository_name = NULL) {
+  if (!$repository_owner) {
+    $repository_owner = variable_get('github_api_default_owner');
+  }
+
+  $client = github_api_client();
+
+  try {
+    $branches_info = $client->api('repo')->branches($repository_owner, $repository_name);
+    return $branches_info;
+  }
+  catch (Exception $exception) {
+    watchdog('github_api', '@exception', array('@exception' => $exception->getMessage()), WATCHDOG_ERROR);
+  }
+}
